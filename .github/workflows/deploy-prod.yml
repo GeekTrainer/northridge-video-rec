@@ -1,0 +1,83 @@
+name: Deploy prod
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+  id-token: write
+
+concurrency:
+  group: azure-terraform
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Promote latest successful dev image
+    runs-on: ubuntu-latest
+    environment: prod
+    env:
+      ARM_USE_OIDC: "true"
+      ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+      ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+    steps:
+      - name: Find the latest successful dev deployment
+        id: source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          run_sha="$(gh api \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/deploy-dev.yml/runs?status=success&branch=main&per_page=1" \
+            --jq '.workflow_runs[0].head_sha')"
+          test -n "$run_sha" && test "$run_sha" != "null"
+          echo "image_tag=$run_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to Azure with OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Verify Azure credentials and image
+        env:
+          IMAGE_TAG: ${{ steps.source.outputs.image_tag }}
+        run: |
+          az account show
+          az acr repository show \
+            --name "${{ vars.ACR_NAME }}" \
+            --image "${{ vars.CONTAINER_IMAGE_NAME }}:${IMAGE_TAG}" \
+            --output none
+
+      - name: Check out the promoted commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.source.outputs.image_tag }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.13.3"
+
+      - name: Initialize Terraform
+        run: >-
+          terraform -chdir=infra init -input=false
+          -backend-config="resource_group_name=${{ vars.TF_STATE_RESOURCE_GROUP }}"
+          -backend-config="storage_account_name=${{ vars.TF_STATE_STORAGE_ACCOUNT }}"
+          -backend-config="container_name=${{ vars.TF_STATE_CONTAINER }}"
+          -backend-config="key=${{ vars.TF_STATE_KEY }}"
+          -backend-config="use_azuread_auth=true"
+          -backend-config="use_oidc=true"
+
+      - name: Promote the image to prod
+        env:
+          IMAGE_TAG: ${{ steps.source.outputs.image_tag }}
+        run: >-
+          terraform -chdir=infra apply -auto-approve -input=false
+          -var="project_name=${{ vars.TF_PROJECT_NAME }}"
+          -var="location=${{ vars.AZURE_LOCATION }}"
+          -var="acr_name=${{ vars.ACR_NAME }}"
+          -var="container_image_tag=${IMAGE_TAG}"
+          -target='azurerm_container_app.application["prod"]'

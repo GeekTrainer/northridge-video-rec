@@ -109,6 +109,12 @@ northridge-video/
 - **Unit** (`npm test`): Node's built-in `node:test` — zero extra runners. The gateway, Music, and Books have full coverage; the Video department is thinly covered and being brought up to parity.
 - **E2E** (`npm run test:e2e`): Playwright drives the full stack through the gateway (browse -> cart -> checkout).
 
+## Azure CI/CD
+
+The Azure Container Apps Terraform and GitHub Actions setup is documented in
+[`infra/README.md`](infra/README.md). Run `scripts/setup-azure-oidc.sh` once to
+configure OIDC, remote Terraform state, and repository variables.
+
 ## Notes
 
 - **Shared database across services.** The department apps are built and run independently but share one SQLite file, so they are not fully isolated services — treat the tables each app reads as owned by that app by convention.

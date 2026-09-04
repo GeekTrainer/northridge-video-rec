@@ -1,0 +1,4 @@
+# Copy to prod.tfvars and set a globally unique ACR name before applying.
+acr_name = "northridgevideoexample"
+
+container_image_tag = "latest"

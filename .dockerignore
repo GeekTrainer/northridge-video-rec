@@ -1,0 +1,17 @@
+.git
+.github
+.copilot
+node_modules
+**/node_modules
+**/dist
+data/northridge.db
+coverage
+playwright-report
+test-results
+*.log
+.env
+.env.*
+!.env.example
+Dockerfile
+docker-compose*.yml
+docker-compose*.yaml
