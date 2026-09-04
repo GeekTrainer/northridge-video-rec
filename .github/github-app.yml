@@ -1,0 +1,5 @@
+scripts:
+  - name: Setup
+    command: npm install
+    triggers:
+      - session.create
