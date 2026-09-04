@@ -52,6 +52,7 @@ Then open **http://localhost:3000**.
 | Video app | http://localhost:3001/video/ |
 | Music app | http://localhost:3002/music/ |
 | Books app | http://localhost:3003/books/ |
+| Schema MCP server | http://localhost:3100/mcp |
 
 You normally only visit `:3000`; the gateway proxies the rest. (Each department also runs a dedicated Vite HMR socket on `24601`-`24603` for hot reload.)
 
@@ -60,6 +61,7 @@ You normally only visit `:3000`; the gateway proxies the rest. (Each department 
 | Command | What it does |
 |---------|--------------|
 | `npm run dev` | Start the gateway + all three departments (via `concurrently`). |
+| `npm run dev:mcp` | Start the read-only schema MCP server (Streamable HTTP on `:3100/mcp`). Seeds the database automatically if it doesn't exist yet. |
 | `npm run db:reset` | Drop, recreate, and re-seed `data/northridge.db`. |
 | `npm test` | Run unit tests (`node:test`). |
 | `npm run test:e2e` | Run end-to-end tests (Playwright). |
@@ -90,6 +92,7 @@ northridge-video/
 |- data/            schema.sql, seed.js, northridge.db (generated)
 |- shared/          openDb() factory, browser cart, shared CSS
 |- gateway/         TS: proxy + search + checkout + shell
+|- mcp-server/      TS: read-only schema MCP server (Streamable HTTP)
 |- apps/
 |  |- video/        JS  - jQuery client + API + Vite middleware
 |  |- music/        TS  - React client + API + Vite middleware

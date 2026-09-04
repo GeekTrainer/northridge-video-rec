@@ -12,7 +12,8 @@
     "gateway",
     "apps/video",
     "apps/music",
-    "apps/books"
+    "apps/books",
+    "mcp-server"
   ],
   "scripts": {
     "dev": "concurrently -n gw,video,music,books -c cyan,yellow,magenta,green npm:dev:gw npm:dev:video npm:dev:music npm:dev:books",
@@ -20,6 +21,7 @@
     "dev:video": "node --watch apps/video/server.js",
     "dev:music": "node --watch apps/music/server.ts",
     "dev:books": "node --watch apps/books/server.ts",
+    "dev:mcp": "node --watch mcp-server/server.ts",
     "db:reset": "node data/seed.js",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "node --test",
@@ -29,7 +31,8 @@
     "start:gw": "node gateway/server.ts",
     "start:video": "node apps/video/server.js --prod",
     "start:music": "node apps/music/server.ts --prod",
-    "start:books": "node apps/books/server.ts --prod"
+    "start:books": "node apps/books/server.ts --prod",
+    "start:mcp": "node mcp-server/server.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0",
