@@ -55,6 +55,8 @@ interface CatalogRow {
   price_cents: number;
 }
 
+type Department = '' | 'video' | 'music' | 'books';
+
 // Cross-vertical search reads the unified `catalog` view — one query, no
 // fan-out to the verticals. Read-only connection for the gateway's lifetime.
 const db = openDb({ readonly: true });
@@ -63,6 +65,7 @@ const searchStmt = db.prepare(
   `SELECT vertical, sku, title, item_type, price_cents
      FROM catalog
     WHERE title LIKE :q
+      AND (:department = '' OR vertical = :department)
     ORDER BY title
     LIMIT 50`,
 );
@@ -70,11 +73,15 @@ const searchPageStmt = db.prepare(
   `SELECT vertical, sku, title, item_type, price_cents
      FROM catalog
     WHERE title LIKE :q
+      AND (:department = '' OR vertical = :department)
     ORDER BY title
     LIMIT :limit OFFSET :offset`,
 );
 const searchCountStmt = db.prepare(
-  'SELECT count(*) AS n FROM catalog WHERE title LIKE :q',
+  `SELECT count(*) AS n
+     FROM catalog
+    WHERE title LIKE :q
+      AND (:department = '' OR vertical = :department)`,
 );
 
 function matchVertical(
@@ -128,14 +135,25 @@ function sendJson(res: ServerResponse, status: number, body: unknown): void {
   res.end(JSON.stringify(body));
 }
 
-// GET /api/search?q=term — cross-vertical search over the unified catalog view.
+function getDepartment(url: URL): Department {
+  const department = url.searchParams.get('department');
+  return department === 'video' || department === 'music' || department === 'books'
+    ? department
+    : '';
+}
+
+// GET /api/search?q=term&department=video — search the unified catalog view.
 function handleSearch(url: URL, res: ServerResponse): void {
   const q = (url.searchParams.get('q') ?? '').trim();
+  const department = getDepartment(url);
   if (!q) {
     sendJson(res, 200, { query: '', results: [] });
     return;
   }
-  const results = searchStmt.all({ q: `%${q}%` }) as unknown as CatalogRow[];
+  const results = searchStmt.all({
+    q: `%${q}%`,
+    department,
+  }) as unknown as CatalogRow[];
   sendJson(res, 200, { query: q, results });
 }
 
@@ -259,10 +277,15 @@ function serveShell(res: ServerResponse): void {
 }
 
 // Server-rendered numbered pager (Bootstrap 4) that preserves the query.
-function searchPager(q: string, page: number, totalPages: number): string {
+function searchPager(
+  q: string,
+  department: Department,
+  page: number,
+  totalPages: number,
+): string {
   if (totalPages <= 1) return '';
   const href = (p: number) =>
-    `/search?q=${encodeURIComponent(q)}&page=${p}`;
+    `/search?q=${encodeURIComponent(q)}&department=${encodeURIComponent(department)}&page=${p}`;
   const item = (p: number, label: string, disabled: boolean, active: boolean) =>
     `<li class="page-item${disabled ? ' disabled' : ''}${active ? ' active' : ''}">` +
     (disabled
@@ -282,11 +305,34 @@ function searchPager(q: string, page: number, totalPages: number): string {
 // Server-rendered cross-vertical search results.
 function serveSearchPage(url: URL, res: ServerResponse): void {
   const q = (url.searchParams.get('q') ?? '').trim();
+  const department = getDepartment(url);
+  const departmentOptions = [
+    ['', 'All departments'],
+    ['video', 'Video'],
+    ['music', 'Music'],
+    ['books', 'Books'],
+  ]
+    .map(
+      ([value, label]) =>
+        `<option value="${value}"${value === department ? ' selected' : ''}>${label}</option>`,
+    )
+    .join('');
+  const searchForm = `<form class="form-inline mb-4" action="/search" method="get">
+    <input class="form-control mr-2" type="search" name="q" value="${escapeHtml(
+      q,
+    )}" placeholder="Search the store" aria-label="Search" />
+    <select class="form-control mr-2" name="department" aria-label="Filter by department">
+      ${departmentOptions}
+    </select>
+    <button class="btn btn-primary" type="submit">Search</button>
+  </form>`;
   let body: string;
   if (!q) {
-    body = `<div class="container my-5"><h2>Search</h2><p class="text-muted">Type something in the search box above.</p></div>`;
+    body = `<div class="container my-5"><h2>Search</h2>${searchForm}<p class="text-muted">Type something in the search box above.</p></div>`;
   } else {
-    const total = (searchCountStmt.get({ q: `%${q}%` }) as { n: number }).n;
+    const total = (
+      searchCountStmt.get({ q: `%${q}%`, department }) as { n: number }
+    ).n;
     const totalPages = Math.max(1, Math.ceil(total / SEARCH_PAGE_SIZE));
     const reqPage = parseInt(url.searchParams.get('page') ?? '1', 10);
     const page = Number.isFinite(reqPage)
@@ -294,6 +340,7 @@ function serveSearchPage(url: URL, res: ServerResponse): void {
       : 1;
     const results = searchPageStmt.all({
       q: `%${q}%`,
+      department,
       limit: SEARCH_PAGE_SIZE,
       offset: (page - 1) * SEARCH_PAGE_SIZE,
     }) as unknown as CatalogRow[];
@@ -308,10 +355,11 @@ function serveSearchPage(url: URL, res: ServerResponse): void {
                  <span class="font-weight-bold">${priceUSD(r.price_cents)}</span>
                </a>`,
           )
-          .join('')}</div>${searchPager(q, page, totalPages)}`
+          .join('')}</div>${searchPager(q, department, page, totalPages)}`
       : `<p class="text-muted">No results for &ldquo;${escapeHtml(q)}&rdquo;.</p>`;
     body = `<div class="container my-5">
       <h2>Search</h2>
+      ${searchForm}
       <p class="text-muted">${total} result${total === 1 ? '' : 's'} for &ldquo;${escapeHtml(q)}&rdquo;:</p>
       ${list}
     </div>`;

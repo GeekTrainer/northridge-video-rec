@@ -39,6 +39,19 @@ test('cross-vertical search returns results spanning departments', async ({
   await expect(page.locator('.nrv-results a').first()).toBeVisible();
 });
 
+test('gateway search filters by department and preserves it in the pager', async ({
+  page,
+}) => {
+  await page.goto('/search?q=e&department=books');
+  await expect(page.locator('select[name="department"]')).toHaveValue('books');
+  await expect(page.locator('.nrv-results a')).toHaveCount(12);
+  await expect(page.locator('.nrv-results a[href^="/books/"]')).toHaveCount(12);
+  await page.locator('.pagination .page-link', { hasText: '2' }).first().click();
+  await expect(page).toHaveURL(/\/search\?q=e&department=books&page=2/);
+  await expect(page.locator('select[name="department"]')).toHaveValue('books');
+  await expect(page.locator('.nrv-results a[href^="/books/"]')).toHaveCount(12);
+});
+
 test('cart persists across verticals and fake checkout confirms', async ({
   page,
 }) => {
