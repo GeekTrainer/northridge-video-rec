@@ -73,6 +73,11 @@ if [[ -z "$repo" ]]; then
   repo="$(gh repo view --json nameWithOwner --jq '.nameWithOwner')"
 fi
 
+repo_metadata="$(gh api "repos/${repo}")"
+repo_owner="$(jq -r '.owner.login' <<<"$repo_metadata")"
+repo_owner_id="$(jq -r '.owner.id' <<<"$repo_metadata")"
+repo_name="$(jq -r '.name' <<<"$repo_metadata")"
+repo_id="$(jq -r '.id' <<<"$repo_metadata")"
 subscription_id="$(az account show --query id --output tsv)"
 tenant_id="$(az account show --query tenantId --output tsv)"
 suffix="$(openssl rand -hex 4)"
@@ -106,6 +111,10 @@ create_federated_credential() {
 
 create_federated_credential "github-dev" "repo:${repo}:environment:dev"
 create_federated_credential "github-prod" "repo:${repo}:environment:prod"
+# workflow_run tokens use numeric owner and repository IDs in their subject.
+numeric_repo="repo:${repo_owner}@${repo_owner_id}/${repo_name}@${repo_id}"
+create_federated_credential "github-dev-workflow-run" "${numeric_repo}:environment:dev"
+create_federated_credential "github-prod-workflow-run" "${numeric_repo}:environment:prod"
 
 subscription_scope="/subscriptions/${subscription_id}"
 for role in Contributor "Role Based Access Control Administrator" AcrPush; do
