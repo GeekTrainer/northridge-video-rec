@@ -15,6 +15,7 @@ apps/*/client/dist/
 test-results/
 playwright-report/
 playwright/.cache/
+.copilot-test-reports/
 
 # Logs & OS cruft
 *.log
