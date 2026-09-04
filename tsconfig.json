@@ -28,7 +28,8 @@
     "apps/books/**/*.ts",
     "apps/books/**/*.tsx",
     "shared/**/*.ts",
-    "tests/**/*.ts"
+    "tests/**/*.ts",
+    "mcp-server/**/*.ts"
   ],
   "exclude": ["node_modules", "**/dist/**"]
 }
