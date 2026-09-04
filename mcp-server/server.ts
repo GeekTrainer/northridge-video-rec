@@ -7,7 +7,9 @@
 // arbitrary SQL against the seeded data — it only reads `sqlite_master` and
 // `PRAGMA` metadata, plus row counts.
 //
-// Run with:  npm run start:mcp   (defaults to http://localhost:3100/mcp)
+// Run with:  npm run start:mcp        (Streamable HTTP, http://localhost:3100/mcp)
+//       or:  node mcp-server/server.ts --stdio   (stdio transport — no server to start;
+//            the MCP client spawns this process directly, per .mcp.json)
 
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -15,6 +17,7 @@ import { dirname, join } from 'node:path';
 import http from 'node:http';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import { openDb, closeAll, registerShutdown, DB_PATH } from '@northridge/shared';
 
@@ -23,9 +26,18 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // --- Ensure the shared DB exists before serving schema questions about it ---
 async function ensureSeeded(): Promise<void> {
   if (existsSync(DB_PATH)) return;
-  console.log('[mcp-server] northridge.db not found — seeding sample data...');
+  console.error('[mcp-server] northridge.db not found — seeding sample data...');
   const seedPath = join(__dirname, '..', 'data', 'seed.js');
-  await import(`file://${seedPath}`);
+  // seed.js logs a summary via console.log; in --stdio mode stdout is the
+  // MCP transport, so redirect it to stderr for the duration of the import.
+  const isStdio = process.argv.includes('--stdio');
+  const originalLog = console.log;
+  if (isStdio) console.log = console.error;
+  try {
+    await import(`file://${seedPath}`);
+  } finally {
+    console.log = originalLog;
+  }
 }
 
 await ensureSeeded();
@@ -255,33 +267,44 @@ server.registerTool(
   },
 );
 
-// --- Streamable HTTP transport (stateless — one transport per request) -----
-const PORT = Number(process.env.PORT) || 3100;
+// --- Transport selection -----------------------------------------------
+// stdio: the MCP client (e.g. Copilot CLI via .mcp.json) spawns this file
+// directly and speaks MCP over stdin/stdout — no server process to run
+// ahead of time. This is the default when invoked with --stdio.
+// Streamable HTTP: a standalone long-lived server other clients can attach
+// to remotely, unaffected by whichever process launched it.
+if (process.argv.includes('--stdio')) {
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+  registerShutdown(() => closeAll());
+} else {
+  const PORT = Number(process.env.PORT) || 3100;
 
-const httpServer = http.createServer(async (req, res) => {
-  if (req.method === 'POST' && req.url === '/mcp') {
-    const transport = new StreamableHTTPServerTransport({
-      sessionIdGenerator: undefined,
-    });
-    res.on('close', () => transport.close());
-    await server.connect(transport);
-    await transport.handleRequest(req, res);
-    return;
-  }
-  if (req.method === 'GET' && req.url === '/health') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ status: 'ok', service: 'northridge-video-schema-mcp' }));
-    return;
-  }
-  res.writeHead(404, { 'Content-Type': 'text/plain' });
-  res.end('Not found');
-});
+  const httpServer = http.createServer(async (req, res) => {
+    if (req.method === 'POST' && req.url === '/mcp') {
+      const transport = new StreamableHTTPServerTransport({
+        sessionIdGenerator: undefined,
+      });
+      res.on('close', () => transport.close());
+      await server.connect(transport);
+      await transport.handleRequest(req, res);
+      return;
+    }
+    if (req.method === 'GET' && req.url === '/health') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ status: 'ok', service: 'northridge-video-schema-mcp' }));
+      return;
+    }
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('Not found');
+  });
 
-httpServer.listen(PORT, () => {
-  console.log(`[mcp-server] http://localhost:${PORT}/mcp`);
-});
+  httpServer.listen(PORT, () => {
+    console.error(`[mcp-server] http://localhost:${PORT}/mcp`);
+  });
 
-registerShutdown(() => {
-  closeAll();
-  httpServer.close();
-});
+  registerShutdown(() => {
+    closeAll();
+    httpServer.close();
+  });
+}
