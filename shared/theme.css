@@ -1,0 +1,96 @@
+/* Northridge Video — light retro accents layered on top of Bootstrap 4.
+   Designed compact-first: the site is used inside a narrow side panel, so the
+   chrome stays slim and the navbar wraps instead of overflowing. */
+
+body {
+  background-color: #f2efe6;
+}
+
+/* ---- Navbar: compact, wraps to a second row on narrow widths ---------- */
+.nrv-navbar .container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+}
+
+.navbar-brand.nrv-brand {
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-size: 1rem;
+  margin-right: auto;
+}
+
+.nrv-navbar .navbar-nav {
+  flex-direction: row;
+}
+
+.nrv-navbar .nav-link {
+  padding: 0.25rem 0.5rem;
+}
+
+/* Search takes its own full-width row beneath the brand/links/cart. */
+.nrv-navbar .nrv-search {
+  flex: 1 1 100%;
+  flex-wrap: nowrap;
+}
+
+.nrv-navbar .nrv-search .form-control {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* ---- Slim hero band (no giant jumbotron) ------------------------------ */
+.nrv-hero {
+  background: linear-gradient(135deg, #2b2d42 0%, #1a1a2e 100%);
+  color: #f8f9fa;
+  border-bottom: 4px solid #ffc107;
+}
+
+.nrv-hero h1 {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.25rem;
+}
+
+.nrv-hero .nrv-hero-tag {
+  color: #ffd966;
+  margin-bottom: 0;
+}
+
+/* ---- Department cards -------------------------------------------------- */
+.nrv-dept-card {
+  border: 2px solid #2b2d42;
+  transition: transform 0.1s ease;
+}
+
+.nrv-dept-card:hover {
+  transform: translateY(-2px);
+}
+
+.nrv-dept-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+/* ---- Footer ----------------------------------------------------------- */
+.nrv-footer {
+  background: #2b2d42;
+  color: #cfd2e0;
+  font-size: 0.8rem;
+}
+
+.nrv-footer a {
+  color: #ffd966;
+}
+
+/* ---- product detail links (Bootstrap 4 verticals) --------------------- */
+.nrv-detail-link {
+  color: #212529;
+}
+
+.nrv-detail-link:hover {
+  color: #007bff;
+}

@@ -1,0 +1,280 @@
+/* Northridge Video — styling for the Video department.
+ *
+ * The Video app predates Music and Books and still uses jQuery. Its styling is
+ * a hand-rolled sheet in an older visual style (14px Helvetica Neue, #337ab7
+ * primary blue, glossy gradient buttons, and panels) rather than the Bootstrap
+ * 4 look used by the newer departments.
+ *
+ * Hand-rolled (no external CSS framework dependency here).
+ */
+
+.nrv-legacy {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.42857;
+  color: #333;
+  background: #fff;
+  margin: 0;
+}
+
+.nrv-legacy a {
+  color: #337ab7;
+  text-decoration: none;
+}
+
+.nrv-legacy a:hover {
+  color: #23527c;
+  text-decoration: underline;
+}
+
+.container-legacy {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+/* ---- navbar-default (Bootstrap 3) ------------------------------------- */
+.navbar-legacy {
+  background-color: #f8f8f8;
+  background-image: linear-gradient(to bottom, #ffffff 0, #f8f8f8 100%);
+  border-bottom: 1px solid #e7e7e7;
+  margin-bottom: 20px;
+}
+
+.navbar-legacy .container-legacy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.brand-legacy {
+  font-size: 18px;
+  font-weight: bold;
+  color: #5e5e5e !important;
+  margin-right: auto;
+}
+
+.nav-legacy {
+  list-style: none;
+  display: flex;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-legacy a {
+  display: block;
+  padding: 6px 10px;
+  color: #777;
+}
+
+.nav-legacy a:hover {
+  color: #333;
+  text-decoration: none;
+}
+
+.cart-legacy {
+  padding: 6px 10px;
+  color: #777;
+}
+
+.search-legacy {
+  display: flex;
+  gap: 6px;
+  flex: 1 1 100%;
+}
+
+.search-legacy input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 6px 12px;
+  font-size: 14px;
+  color: #555;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* ---- headings --------------------------------------------------------- */
+.legacy-h1 {
+  font-size: 28px;
+  font-weight: 500;
+  margin: 10px 0;
+}
+
+/* ---- panel + list (Bootstrap 3) --------------------------------------- */
+.panel-legacy {
+  margin-bottom: 20px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.panel-heading-legacy {
+  padding: 10px 15px;
+  font-size: 16px;
+  color: #333;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #ddd;
+  border-radius: 3px 3px 0 0;
+}
+
+.list-item-legacy {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 15px;
+  border-top: 1px solid #ddd;
+}
+
+.list-item-legacy:first-child {
+  border-top: none;
+}
+
+.li-title {
+  font-weight: bold;
+}
+
+.li-meta {
+  color: #777;
+  font-size: 13px;
+}
+
+.li-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.li-price {
+  font-weight: bold;
+  color: #333;
+}
+
+/* ---- glossy Bootstrap 3 primary button -------------------------------- */
+.btn-legacy {
+  display: inline-block;
+  padding: 6px 12px;
+  font-size: 14px;
+  line-height: 1.42857;
+  white-space: nowrap;
+  cursor: pointer;
+  color: #fff;
+  border: 1px solid #2e6da4;
+  border-radius: 4px;
+  background-color: #337ab7;
+  background-image: linear-gradient(to bottom, #337ab7 0, #265a88 100%);
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 1px 1px rgba(0, 0, 0, 0.075);
+}
+
+.btn-legacy:hover {
+  color: #fff;
+  text-decoration: none;
+  background-image: linear-gradient(to bottom, #2e6da4 0, #1c4b78 100%);
+}
+
+.btn-legacy:active {
+  box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+}
+
+/* ---- text muted (legacy) ---------------------------------------------- */
+.text-muted-legacy {
+  color: #999;
+  font-size: 13px;
+}
+
+/* ---- pagination (Bootstrap 3 era) ------------------------------------- */
+.pagination-legacy {
+  display: inline-flex;
+  padding-left: 0;
+  margin: 20px 0;
+  border-radius: 4px;
+  list-style: none;
+}
+
+.pagination-legacy > li > a {
+  position: relative;
+  float: left;
+  padding: 6px 12px;
+  margin-left: -1px;
+  line-height: 1.42857;
+  color: #337ab7;
+  text-decoration: none;
+  background-color: #fff;
+  border: 1px solid #ddd;
+}
+
+.pagination-legacy > li:first-child > a {
+  margin-left: 0;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.pagination-legacy > li:last-child > a {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.pagination-legacy > li > a:hover {
+  color: #23527c;
+  background-color: #eee;
+  border-color: #ddd;
+}
+
+.pagination-legacy > li.active > a {
+  z-index: 2;
+  color: #fff;
+  cursor: default;
+  background-color: #337ab7;
+  border-color: #337ab7;
+}
+
+.pagination-legacy > li.disabled > a {
+  color: #777;
+  cursor: not-allowed;
+  background-color: #fff;
+  border-color: #ddd;
+}
+
+/* ---- detail page (legacy) --------------------------------------------- */
+.detail-link-legacy {
+  color: #337ab7;
+}
+
+.panel-body-legacy {
+  padding: 15px;
+}
+
+.detail-row-legacy {
+  display: flex;
+  gap: 10px;
+  padding: 6px 0;
+  border-top: 1px solid #eee;
+}
+
+.detail-row-legacy:first-of-type {
+  border-top: none;
+}
+
+.detail-label-legacy {
+  flex: 0 0 110px;
+  color: #777;
+}
+
+.detail-buy-legacy {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 15px;
+  padding-top: 12px;
+  border-top: 1px solid #ddd;
+}

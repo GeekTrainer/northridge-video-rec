@@ -1,0 +1,43 @@
+{
+  "name": "northridge-video",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Northridge Video — e-commerce storefront for a neighborhood media shop.",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "workspaces": [
+    "shared",
+    "gateway",
+    "apps/video",
+    "apps/music",
+    "apps/books"
+  ],
+  "scripts": {
+    "dev": "concurrently -n gw,video,music,books -c cyan,yellow,magenta,green npm:dev:gw npm:dev:video npm:dev:music npm:dev:books",
+    "dev:gw": "node --watch gateway/server.ts",
+    "dev:video": "node --watch apps/video/server.js",
+    "dev:music": "node --watch apps/music/server.ts",
+    "dev:books": "node --watch apps/books/server.ts",
+    "db:reset": "node data/seed.js",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "node --test",
+    "test:e2e": "playwright test",
+    "build": "npm run typecheck && npm run build --workspaces --if-present",
+    "start": "concurrently -n gw,video,music,books -c cyan,yellow,magenta,green npm:start:gw npm:start:video npm:start:music npm:start:books",
+    "start:gw": "node gateway/server.ts",
+    "start:video": "node apps/video/server.js --prod",
+    "start:music": "node apps/music/server.ts --prod",
+    "start:books": "node apps/books/server.ts --prod"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^24.0.0",
+    "concurrently": "^9.1.0",
+    "typescript": "^5.8.0"
+  },
+  "dependencies": {
+    "bootstrap": "^4.6.2"
+  }
+}

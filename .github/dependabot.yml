@@ -1,0 +1,19 @@
+# Dependabot configuration.
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+version: 2
+
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    cooldown:
+      # Organization policy: do not adopt any release that is less than 7 days
+      # old. This "cooldown" reduces exposure to compromised or broken packages
+      # published in the last week. The same 7-day floor is also enforced at
+      # install time via the npm `min-release-age` setting.
+      default-days: 7
+      semver-major-days: 7
+      semver-minor-days: 7
+      semver-patch-days: 7

@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Generated database (rebuilt via `npm run db:reset`)
+data/northridge.db
+data/northridge.db-journal
+data/northridge.db-wal
+data/northridge.db-shm
+
+# Build output
+dist/
+apps/*/client/dist/
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Logs & OS cruft
+*.log
+.DS_Store

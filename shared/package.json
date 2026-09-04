@@ -1,0 +1,27 @@
+{
+  "name": "@northridge/shared",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "db.js",
+  "types": "db.d.ts",
+  "exports": {
+    ".": {
+      "types": "./db.d.ts",
+      "default": "./db.js"
+    },
+    "./cart.js": {
+      "types": "./cart.d.ts",
+      "default": "./cart.js"
+    },
+    "./cart-ui.js": {
+      "types": "./cart-ui.d.ts",
+      "default": "./cart-ui.js"
+    },
+    "./static.js": {
+      "types": "./static.d.ts",
+      "default": "./static.js"
+    },
+    "./theme.css": "./theme.css"
+  }
+}

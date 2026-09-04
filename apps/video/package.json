@@ -1,0 +1,16 @@
+{
+  "name": "@northridge/video",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@northridge/shared": "*",
+    "jquery": "^3.7.1"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  },
+  "scripts": {
+    "build": "vite build"
+  }
+}
