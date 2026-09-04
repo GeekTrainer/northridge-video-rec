@@ -1,8 +1,9 @@
 {
   "mcpServers": {
     "northridge-video-schema": {
-      "type": "http",
-      "url": "http://localhost:3100/mcp"
+      "type": "stdio",
+      "command": "node",
+      "args": ["mcp-server/server.ts", "--stdio"]
     }
   }
 }
