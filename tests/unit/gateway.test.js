@@ -46,6 +46,24 @@ test('GET /api/search finds items across verticals', async () => {
   assert.ok(verticals.size >= 2);
 });
 
+test('GET /api/search filters results by department', async () => {
+  const res = await fetch(`${base}/api/search?q=the&department=music`);
+  assert.equal(res.status, 200);
+  const data = await res.json();
+  assert.ok(data.results.length > 0);
+  assert.ok(data.results.every((result) => result.vertical === 'music'));
+});
+
+test('GET /api/search accepts every supported department', async () => {
+  for (const department of ['video', 'music', 'books']) {
+    const res = await fetch(`${base}/api/search?q=the&department=${department}`);
+    assert.equal(res.status, 200);
+    const data = await res.json();
+    assert.ok(data.results.length > 0);
+    assert.ok(data.results.every((result) => result.vertical === department));
+  }
+});
+
 test('GET /api/search with empty query returns no results', async () => {
   const res = await fetch(`${base}/api/search?q=`);
   const data = await res.json();
@@ -73,6 +91,16 @@ test('GET /search?page=2 returns a different slice of results', async () => {
   const page1 = await (await fetch(`${base}/search?q=e&page=1`)).text();
   const page2 = await (await fetch(`${base}/search?q=e&page=2`)).text();
   assert.notEqual(page1, page2);
+});
+
+test('GET /search filters by department and preserves it in the pager', async () => {
+  const res = await fetch(`${base}/search?q=e&department=books`);
+  assert.equal(res.status, 200);
+  const html = await res.text();
+  assert.match(html, /name="department"/);
+  assert.match(html, /<option value="books" selected>/);
+  assert.match(html, /department=books/);
+  assert.doesNotMatch(html, /badge badge-secondary text-uppercase mr-2">music</);
 });
 
 test('GET /cart renders the cart page', async () => {
